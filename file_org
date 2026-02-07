@@ -1,0 +1,32 @@
+import os
+import shutil
+
+def organize_junk(folder_path):
+    # Map extensions to folder names
+    mapping = {
+        'Documents': ['.pdf', '.docx', '.txt', '.pptx'],
+        'Images': ['.jpg', '.jpeg', '.png', '.gif'],
+        'Executables': ['.exe', '.msi', '.deb'],
+        'Archives': ['.zip', '.tar', '.gz', '.rar'],
+        'Data': ['.csv', '.xlsx', '.json', '.sql']
+    }
+
+    for filename in os.listdir(folder_path):
+        filepath = os.path.join(folder_path, filename)
+        
+        # Skip directories
+        if os.path.isdir(filepath):
+            continue
+            
+        extension = os.path.splitext(filename)[1].lower()
+        
+        for folder, ext_list in mapping.items():
+            if extension in ext_list:
+                dest_folder = os.path.join(folder_path, folder)
+                os.makedirs(dest_folder, exist_ok=True)
+                shutil.move(filepath, os.path.join(dest_folder, filename))
+                print(f"Moved: {filename} -> {folder}/")
+
+if __name__ == "__main__":
+    target = "./my_downloads" # Changeable path
+    organize_junk(target)
