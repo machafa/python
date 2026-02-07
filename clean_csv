@@ -1,0 +1,21 @@
+import pandas as pd
+
+def clean_data(input_file, output_file):
+    # Load dataset
+    df = pd.read_csv(input_file)
+    
+    # 1. Remove exact duplicates
+    df.drop_duplicates(inplace=True)
+    
+    # 2. Fill missing values (Numeric with mean, objects with 'N/A')
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = df[col].fillna('Unknown').str.strip().str.title()
+        else:
+            df[col] = df[col].fillna(df[col].mean())
+            
+    # 3. Export cleaned data
+    df.to_csv(output_file, index=False)
+    print(f"Cleaned data saved to {output_file}")
+
+# clean_data('raw_report.csv', 'clean_report.csv')
