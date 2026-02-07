@@ -1,0 +1,36 @@
+import platform
+import psutil
+from datetime import datetime
+
+def generate_report():
+    sys_info = {
+        "OS": platform.system(),
+        "Node": platform.node(),
+        "CPU Usage (%)": psutil.cpu_percent(interval=1),
+        "Memory Usage (%)": psutil.virtual_memory().percent,
+        "Report Generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    html_content = f"""
+    <html>
+    <head><style>body {{ font-family: sans-serif; }} .card {{ border: 1px solid #ccc; padding: 20px; }}</style></head>
+    <body>
+        <h1>System Status Report</h1>
+        <div class="card">
+            <p><strong>Host:</strong> {sys_info['Node']}</p>
+            <p><strong>OS:</strong> {sys_info['OS']}</p>
+            <p><strong>CPU:</strong> {sys_info['CPU Usage (%)']}%</p>
+            <p><strong>RAM:</strong> {sys_info['Memory Usage (%)']}%</p>
+            <hr>
+            <small>Generated on: {sys_info['Report Generated']}</small>
+        </div>
+    </body>
+    </html>
+    """
+
+    with open("system_report.html", "w") as f:
+        f.write(html_content)
+    print("Report 'system_report.html' created successfully.")
+
+if __name__ == "__main__":
+    generate_report()
