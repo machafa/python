@@ -1,0 +1,57 @@
+import socket
+import threading
+from queue import Queue
+
+# Configuration
+TARGET = "127.0.0.1"  # Or your server's IP
+THREAD_COUNT = 100    # Number of concurrent workers
+port_queue = Queue()
+open_ports = []
+
+# The Worker Function
+def scan_worker():
+    while not port_queue.empty():
+        # Get the next port from the queue
+        port = port_queue.get()
+        
+        try:
+            # Create a socket object
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # Set a short timeout so we don't wait forever on closed ports
+            s.settimeout(0.5)
+            
+            # Attempt to connect (returns 0 on success)
+            result = s.connect_ex((TARGET, port))
+            if result == 0:
+                print(f"[+] Port {port} is OPEN")
+                open_ports.append(port)
+            
+            s.close()
+        except Exception:
+            pass
+        finally:
+            # Task is finished for this port
+            port_queue.task_done()
+
+def run_scanner(port_range):
+    # 1. Fill the queue with ports
+    for port in port_range:
+        port_queue.put(port)
+
+    # 2. Start the threads
+    thread_list = []
+    for _ in range(THREAD_COUNT):
+        t = threading.Thread(target=scan_worker)
+        t.start()
+        thread_list.append(t)
+
+    # 3. Wait for all threads to finish
+    for t in thread_list:
+        t.join()
+
+    print("-" * 30)
+    print(f"Scan complete. Open ports: {open_ports}")
+
+if __name__ == "__main__":
+    # Scanning common ports (1 to 1024)
+    run_scanner(range(1, 1025))
